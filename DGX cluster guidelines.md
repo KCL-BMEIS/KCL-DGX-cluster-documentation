@@ -14,7 +14,7 @@ The below image shows a typical issue on the cluster. Almost all of the 71 gpus 
 utilization is 35%. If the average compute utilization were 90% then the exact same workload could be done on just 28
 GPUs instead of 71, and they would each be done faster too.
 
-![gpu_utilization.png](gpu_utilization.png)
+![gpu_utilization.png](assets/gpu_utilization.png)
 
 ---
 
@@ -36,7 +36,7 @@ nvidia-smi -l 1
 For checking job utilization on the cluster a nice GUI representation is shown via the RunAI dashboard. Simply follow
 `Workloads` -> `<your job name>` -> `metrics` -> `GPU compute utilization`
 
-![workloads_location.png](workloads_location.png)
+![workloads_location.png](assets/workloads_location.png)
 
 Third party alternatives which allow easy tracking and visualization of desired metrics, also automatically monitor
 resource usage too (Free to use). Such examples are [Weights & Biases](https://wandb.ai/site),
