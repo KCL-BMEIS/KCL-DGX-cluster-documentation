@@ -1,133 +1,291 @@
-# DGX cluster guidelines
+# RunAI Centre DGX Cluster - School of BMEIS
 
-The most important aspect of fair and effective use of the GPU cluster is to balance and maximize GPU compute
-utilization. This is vital, not just for fair usage amongst your colleagues, but also for improving the speed of your
-own work.
+## Introduction
 
-GPU compute utilization refers to the percentage of a GPU's processing power actively used at a given time. This **DOES
-NOT** refer specifically to the GPU memory (VRAM)  utilization. The important message is that the higher the GPU compute
-utilization, the faster the job will get done. You should be aiming to have >90% compute utilization.
+The School of BMEIS AI cluster is a system made of the following components:
 
-## The issue visualized
+* 3 x Dell PowerEdge headnodes running Ubuntu (currently 20.04)
+* 2 x Nvidia DGX2 work nodes with 16 GPUs each
+* 4 x Nvidia DGX A100 worker nodes with 8 GPUs each
+* A NetApp AFF800 all-flash storage with 512TB of space
 
-The below image shows a typical issue on the cluster. Almost all of the 71 gpus are allocated, yet their compute
-utilization is 35%. If the average compute utilization were 90% then the exact same workload could be done on just 28
-GPUs instead of 71, and they would each be done faster too.
+The DGX1, DGX2 and NetApp AFF8000 are 3+ years old (as of December 2022) and out of support, but they are still working
+fine.
+The 4 DGX A100 nodes are new and will be supported for 5 years.
 
-![gpu_utilization.png](gpu_utilization.png)
+The job scheduler is RunAI, a submission system based on Kubernetes, which is a system for deploying and managing
+containerised applications.
+
+Users wanting to use the cluster and submit jobs need to access one of the headnodes via ssh. To do this, new starters
+need an account on the cluster. This can be requested by their supervisors sending an email to `isd-it@kcl.ac.uk` or to
+`isd-helpdesk@kcl.ac.uk`
 
 ---
 
-## Section 1: How to check GPU utilization
+## Users of the cluster must follow the recommended guidelines described in `DGX cluster guidelines.md`
 
-There are multiple ways to check your GPU compute utilization, both on your local pc and on the DGX cluster.
+---
 
-### On local machine
+## How to access the headnodes
 
-On local machines the following command will show a GPU summary every 1 seconds (The key metric
-being `VOLATILE GPU-Util`):
+You will need to login to aicheadnode.isd.kcl.ac.uk to submit jobs.
 
-```shell
-nvidia-smi -l 1
+The headnodes are accessible directly from any of the (wired) School networks in St Thomas or Becket House. If using
+Wi-Fi or if working from home, you will need to use the school ssh gateway (bouncer.isd.kcl.ac.uk) as a jump host to
+access the headnodes.
+
+**IMPORTANT:** Because of the multi-headnode setup, you will need to add the following lines to your `.ssh/config` file
+in your client machine when accessing the headnode at the address aicheadnode:
+
+```
+Host aicheadnode*
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
 ```
 
-### On DGX cluster
+This will prevent the ssh client from complaining because the name aicheadnode is load-balancing via DNS and is in fact
+accessing randomly one of the 3 headnode servers.
 
-For checking job utilization on the cluster a nice GUI representation is shown via the RunAI dashboard. Simply follow
-`Workloads` -> `<your job name>` -> `metrics` -> `GPU compute utilization`
+If you do not have one already, you can request an account on bouncer sending an email to isd-it@kcl.ac.uk or to
+isd-helpdesk@kcl.ac.uk. Please copy your supervisor in CC when doing so.
 
-![workloads_location.png](workloads_location.png)
+The new version of the cluster, expanded to 8 nodes in December 2022, has 3 headnodes instead of one, to redistribute
+the users evenly and reducing the workload on each headnode server.
 
-Third party alternatives which allow easy tracking and visualization of desired metrics, also automatically monitor
-resource usage too (Free to use). Such examples are [Weights & Biases](https://wandb.ai/site),
-[neptune.ai](https://neptune.ai/).
+* You will need to use the name aicheadnode.isd.kcl.ac.uk to connect (which resolves to all 3 addresses, so you will
+  randomly access one of the headnode servers).
+* Your home folder is centralised and stored on the NetApp storage system, so it does not really matter which of the 3
+  headnode servers you login to.
 
----
+**IMPORTANT:** the only exception is when you are connecting to the cluster for the first time or if you need to change
+the password for your account on the cluster. We have restricted the change password functionality to only one of the
+nodes: h1.isd.kcl.ac.uk (a.k.a. headnode1.isd.kcl.ac.uk), to make the synchronisation of the password file across the
+three nodes easier to manage. So, if you need to change your account's password, you will need to login to
+h1.isd.kcl.ac.uk and use the passwd command. If you try to change your password while logged in on h2 or h3, you will
+receive a message telling you to do it on h1 (headnode1).
 
-## Section 2: How to Optimize GPU utilization
+**Examples:**
 
-Achieving maximum GPU compute utilization during deep learning training can be done a number of ways.
+**Accessing from a computer connected to one of the BMEIS (wired) networks:**
 
-### 1. Make the most of the pytorch dataloader: [torch.utils.data.DataLoader](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader)
-
-This includes:
-
-- Setting `batch_size` to as high as possible before reaching an OOM error (VRAM too full to fit all data). This
-  maximizes the time the GPU spends on performing computations, before having to wait for more data to be loaded.
-- Setting `num_workers` > 0 to use multiple cpu cores for loading data. This is to minimize the time spent by the GPU
-  waiting idly for the CPU to transfer data to it for processing.
-- Raising value of `prefetch_factor`.
-- Setting `pin_memory=True`
-- Setting `persistent_workers=True`
-
-A good default dataloader may look like this:
-
-```python
-my_dataloader = torch.utils.data.DataLoader(my_dataset,
-                                            batch_size= < max_batchsize >,
-num_workers = < num_cpu_cores >,
-prefetch_factor = 4,
-pin_memory = True,
-persistent_workers = True)
+```
+ssh <your cluster username>@aicheadnode
+or run
+ssh <your cluster username>@aicheadnode.isd.kcl.ac.uk
 ```
 
-### 2. No brainer code tweaks
+**Accessing from a computer at home or outside the BMEIS network:**
 
-There are a number of easy changes you can use to greatly improve training speed of your models, while changing
-absolutely nothing about how your network trains/ how you debug. The recommendation would be to always use these
-suggested options, no matter what you do.
+```
+ssh -J <your bouncer username>@bouncer.isd.kcl.ac.uk <your_cluster_username>@aicheadnode
+```
 
-These include:
+**Note:** If you already had an account on the cluster before the cluster expansion/redeployment, your credentials
+should have been kept and you should be able to login as before, regardless if you were using a password or were
+accessing via
 
-- Using `model.zero_grad(set_to_none=True)` instead of `model.zero_grad()`
-- Disable bias for convolutions directly followed by a batch norm i.e. `torch.nn.Conv2d(..., bias=False, ....)`
-- Using `torch.backends.cudnn.benchmark = True` to automatically find fastest convolution algorithm.
-- Create tensors directly on the target device e.g. Instead of calling `torch.rand(size).cuda()` instead
-  use `torch.rand(size, device='cuda')`
-- Setting `torch.backends.cuda.matmul.allow_tf32 = True` and `torch.backends.cudnn.allow_tf32 = True`. This allows
-  pytorch to use the tensor processing cores on newer GPU architectures for matrix multiplication and convolutions.
-- Disabling gradient calculation for validation or inference using `torch.no_grad()`. Typically, gradients aren’t needed
-  for validation or inference.
-- Consider replacing a manual implementation of the attention mechanism
-  with `torch.nn.functional.scaled_dot_product_attention`. It calculates eactly the same thing but uses tricks under the
-  hood to perform a much more efficient calculation, while better utilizing your hardware.
 
-### 3. code tweaks to think about
+## Setting Up the Environment for RunAI
 
-There are also a number of code tweaks which you can implement cautiously.
+After logging in to the cluster headnode for the first time, you'll need to configure the environment for the RunAI scheduler. Here are the commands:
 
-These include:
+```
+runai login -> When prompted, authenticate with your RunAI portal account details.
+runai config project DGX_username -> Replace `DGX_username` with your username on the cluster nodes.
+```
 
-- Using `torch.nn.parallel.DistributedDataParallel` instead of `torch.nn.DataParallel`. This is recommended best
-  practise by Pytorch themselves and offers much better performance/scaling. A simple example of how to
-  use `torch.nn.parallel.DistributedDataParallel` is shown in `ddp_example.py`. Further documentation can be
-  found [here](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel).
-- Performing data augmentations on the gpu, instead of the cpu. By default pytorch will perform the selected data
-  augmentations on the cpu instead of the gpu, and this is a particular performance drain for computationally expensive
-  augmentations e.g. warping 3d data. The data can be moved to the gpu and a custom augmentation function can be coded
-  using pytorch to then automatically perform the computation on the gpu. A simple example of how to perform GPU based
-  data augmentations can be found in `gpu_data_augmentations.py`.
-- Enabling channels_last memory format for vision models if there are no hard coded operations on exact tensor
-  dimensions in your code e.g. `my_data = my_data.to(memory_format=torch.channels_last)`. Take care to also make sure
-  that your model is also in the same channels format e.g. `my_model = my_model.to(memory_format=torch.channels_last)`.
-  Further details can be found [here](https://pytorch.org/tutorials/intermediate/memory_format_tutorial.html).
-- Disabling debugging APIs. When you are finished coding/debuggin a model you don't need all the background activity of
-  Pytorch checking everything is ok for debugging purposes. These options can be disabled
-  using `torch.autograd.set_detect_anomaly(False)`, `torch.autograd.profiler.profile(enabled=False)`
-  and `torch.autograd.profiler.emit_nvtx(enabled=False)`.
-- Using torch automatic mixed precision. Most models can train/inference perfectly well in a reduced level of numerical
-  precision, in theory doubling your compute speed while halving your memory consumption. Care should be taken to make
-  sure your model is stable before relying fully on automatic mixed precision. It can be used as a context manager
-  e.g. `with torch.autocast(device_type="cuda"):`. A simple example of how to automatic mixed precision is shown
-  in `amp_example.py`. Further documention can be found [here](https://pytorch.org/docs/stable/amp.html#torch.autocast).
-- Trying to compile your pytorch model when you are finished debugging. This is often prone to failure and should be
-  wrapped in a try statement, however it can greatly improve speed. It can
-  be initiated using `my_model = torch.compile(my_model)`
+## Access to Worker Nodes (DGXs)
 
----
+Following the upgrade, access to the DGX (worker nodes) has been disabled for users. This is because it's not required and can cause problems. To use the cluster and submit jobs, you only need access to one of the headnodes. Refer to the instructions in the previous section.
 
-## Section 3: Putting it all together
+## The Registry
 
-A barebones example template script using all of the recommendations can be found in `simple_example.py`. Another script
-based upon `simple_recommendations_example.py` which has some more complexity added for better quality of life
-is `fancy_recommendations_example.py`
+The registry is now distributed across all three headnodes, increasing the cluster's high availability. Use the hostname `aicregistry` with port 5000 to access the registry from the headnode where you're logged in.
+
+## Running a Job Using a Standard Nvidia Container
+
+Begin by pulling the desired container. Here are some examples of pulling PyTorch and TensorFlow containers:
+
+```
+# TensorFlow version 1
+docker pull nvcr.io/nvidia/tensorflow:22.11-tf2-py3
+
+# TensorFlow version 2
+docker pull nvcr.io/nvidia/tensorflow:22.11-tf2-py3
+
+# PyTorch version 1
+docker pull nvcr.io/nvidia/pytorch:22.11-py3
+```
+
+For further documentation and a comprehensive list of other available Nvidia containers, refer to [here](link to Nvidia container documentation).
+
+You can now run a job using a Docker image built with this container by using the RunAI submission system. The main arguments are outlined below, along with an example:
+
+**Main Submission Arguments:**
+
+* `runai submit --name <Job Name>`: Specifies the name of your job.
+* `--image -i <Docker Image>`: Defines the Docker image to use.
+* `--run-as-user`: Runs the job with your user privileges.
+* `--gpu -g <Number Of GPUs>`: Sets the number of GPUs to allocate to the job.
+* `--project -p <Username/Project Name>`: Assigns the job to your project.
+* `--volume -v <Directory:Mount Name>`: Mounts a volume from the cluster to the container.
+* `--command -- <Command To Run>`: Specifies the command to execute within the container.
+
+**Example for user "pedro":**
+
+```
+runai submit --name tester \
+  --image nvcr.io/nvidia/tensorflow:22.11-tf2-py3 \
+  --run-as-user \
+  --gpu 1 \
+  --project pedro \
+  -v /nfs:/nfs \
+  --command -- bash /nfs/home/pedro/tester/run_tester.sh 'train'
+```
+
+In this example, `run_tester.sh` is a bash script that might contain additional commands like `python3`. To run the script, we call `bash`, hence it's included in the `--command` option.
+
+**General Tips:**
+
+* It's recommended to always include `-v /nfs:/nfs` and `--run-as-user` in your commands.
+* Refer to the RunAI submit documentation for further information.
+
+## Job Monitoring/Listing/Deletion
+
+Once you've submitted a job, you can view its details using:
+
+```
+runai describe job <JobName>
+```
+
+This will show the job's queuing status and any submission errors. Refer to the official man page on `runai describe` for more details.
+
+To check on a running job (similar to running it locally), use:
+
+```
+runai logs <JobName>
+```
+
+See the official man page on `runai logs` for more information.
+
+To view a list of currently pending or running jobs, use:
+
+```
+runai list
+```
+
+Refer to the official man page on `runai list` for details.
+
+To delete a job, use:
+
+```
+runai delete job <JobName>
+```
+
+See the official man page on `runai delete` for more information.
+
+## Checking Job Logs Using TensorBoard
+
+This section explains how to view logs from a running job using TensorBoard.
+
+**Steps:**
+
+1. **Submit an interactive job:** Submit an interactive job specifically for running TensorBoard on your desired directory using a specific port. Utilize the `--interactive` and `--gpu 0` flags during submission.
+
+**Note:** This interactive job is solely for TensorBoard, not your actual training job. Submit training jobs separately.
+
+2. **Access the interactive job:** Use the command `runai bash <JOBNAME>` to access the interactive job.
+
+3. **Find the host IP:** Within the interactive job, run `hostname -i` to determine the host IP address.
+
+4. **Run the SSH tunnel locally:** On your local machine, run the following command to establish an SSH tunnel:
+
+```
+ssh -N -f -L <LOCALPORT>:<HOSTNAME>:<DGXPORT> <USER>@h1 (replace with h1, h2 or h3 according to the previous command output). The ports can be any two (different) numbers.
+```
+
+5. **Run TensorBoard in the interactive job:** Inside the interactive job, execute the following command (adjust accordingly):
+
+```
+tensorboard --logdir <LOGDIR> --port <DGXPORT>
+```
+
+6. **View TensorBoard logs:** Finally, navigate to `http://localhost:<LOCALPORT>` in your web browser to view the TensorBoard logs.
+
+**Simplifying Steps:**
+
+Steps 1, 3, and 5 can be consolidated by creating a bash script containing both `hostname -i` and `tensorboard --logdir <LOGDIR> --port <DGXPORT>`. This way, you only need to check the job logs to obtain the host IP.
+
+## Running Jobs with Custom Containers
+
+This section guides you through creating and utilizing your custom Docker image for running jobs.
+
+**Steps:**
+
+1. **Create a folder:** Within your home directory, create a folder to store your Dockerfile and related files for container creation.
+
+2. **Create a Dockerfile:** Use your preferred editor to create a Dockerfile specifying the desired software available in your container. Here's a recommended approach:
+
+   * Start by pulling an existing container (e.g., Nvidia TensorFlow container).
+   * Install any supplementary programs required.
+
+   **Basic Template:**
+
+   ```dockerfile
+   FROM nvcr.io/nvidia/tensorflow:22.11-tf2-py3
+
+   ARG USER_ID
+   ARG GROUP_ID
+   ARG USER
+
+   RUN addgroup --gid $GROUP_ID $USER
+   RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
+   WORKDIR /nfs/home/$USER
+   EXPOSE 8888
+   ```
+
+3. **Place additional files (optional):** If you have additional files the Dockerfile needs to read, place them in the same folder. Before using them in a command, explicitly copy them into the current directory.
+
+   ```
+   # Example: requirements.txt containing packages to install using pip
+   COPY requirements.txt.
+   RUN pip3 install -r requirements.txt
+   ```
+
+4. **Build and push the image:** Create a bash script containing the following commands to build and push your image to the registry (assuming the script is in the same directory as your Dockerfile named Dockerfile):
+
+   ```bash
+   #!/bin/bash
+
+   # Create a tag or name for the image
+   docker_tag="your_image_name:tag"
+
+   # Build the image using your Dockerfile and arguments
+   docker build . -f Dockerfile \
+     --tag ${docker_tag} --network=host \
+     --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg USER=${USER}
+
+   docker push ${docker_tag}
+   ```
+
+   Run this script to build and push the image.
+
+5. **Verify image creation:** Use `docker images` to confirm successful image creation.
+
+6. **Run a job with your custom image:** You can now use your custom image just like a standard container by specifying its name in the `--image` argument of the `runai` command.
+
+## How to Check Job Failures
+
+This section explains how to identify the underlying error causing job failures and prevent them from getting stuck in a loop.
+
+**Steps:**
+
+1. **Get your job name:** Utilize the following command to list all jobs under your username:
+
+   ```
+   runai list --project <User Name>
+   ```
+
+   Replace `<User Name>` with your actual username.
+
+2. **Grab all pods:** Following these steps will help you
