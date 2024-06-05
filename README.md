@@ -65,10 +65,10 @@ A good default dataloader may look like this:
 ```python
 my_dataloader = torch.utils.data.DataLoader(my_dataset,
                                             batch_size= < max_batchsize >,
-                                            num_workers = < num_cpu_cores >,
-                                            prefetch_factor = 4,
-                                            pin_memory = True,
-                                            persistent_workers = True)
+num_workers = < num_cpu_cores >,
+prefetch_factor = 4,
+pin_memory = True,
+persistent_workers = True)
 ```
 
 ### 2. No brainer code tweaks
