@@ -22,7 +22,7 @@ GPUs instead of 71, and they would each be done faster too.
 
 There are multiple ways to check your GPU compute utilization, both on your local pc and on the DGX cluster.
 
-### On local machine
+### On a local machine
 
 On local machines the following command will show a GPU summary every 1 seconds (The key metric
 being `VOLATILE GPU-Util`):
@@ -31,12 +31,20 @@ being `VOLATILE GPU-Util`):
 nvidia-smi -l 1
 ```
 
-### On DGX cluster
+### On the DGX cluster
 
 For checking job utilization on the cluster a nice GUI representation is shown via the RunAI dashboard. Simply follow
 `Workloads` -> `<your job name>` -> `metrics` -> `GPU compute utilization`
 
-![workloads_location.png](assets/workloads_location.png)
+You can find the workloads in the bar on the left:
+![workloads_location1.png](assets/workloads_location1.png)
+
+You need to then find your job (in this case it is `david-train`) and then click on the `show details` button in the top
+right:
+![workloads_location2.png](assets/workloads_location2.png)
+
+Finally under the metrics tab you can see the system resource usage:
+![workloads_location3.png](assets/workloads_location3.png)
 
 Third party alternatives which allow easy tracking and visualization of desired metrics, also automatically monitor
 resource usage too (Free to use). Such examples are [Weights & Biases](https://wandb.ai/site),
