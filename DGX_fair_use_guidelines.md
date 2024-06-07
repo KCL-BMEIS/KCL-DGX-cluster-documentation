@@ -102,9 +102,9 @@ These include:
   def evaluate(model, dataloader):
     # Your code here
   ```
-  On the other hand, if you just need to stop the gradient calculation in a small section of the code use it under the `with` operator:
+  On the other hand, if you just need to stop the gradient calculation in a specific section of the code use it under the `with` operator:
   ```python
-  def my_function():
+  def my_function(model, dataloader):
     # Your code with gradient
 
     with torch.no_grad():
@@ -147,7 +147,7 @@ These include:
   in `amp_example.py`. Further documention can be found [here](https://pytorch.org/docs/stable/amp.html#torch.autocast).
 - Trying to compile your pytorch model when you are finished debugging. This is often prone to failure and should be
   wrapped in a try statement, however it can greatly improve speed. It can
-  be initiated using `my_model = torch.compile(my_model)`
+  be initiated using `my_model = torch.compile(my_model)`. This only works on `torch >= 2.0.0`.
 
 ---
 
