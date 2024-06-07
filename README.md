@@ -289,3 +289,7 @@ This section explains how to identify the underlying error causing job failures 
    Replace `<User Name>` with your actual username.
 
 2. **Grab all pods:** Following these steps will help you
+
+## Next steps...
+
+Once you are familiar on how to run and manage jobs in the cluster, in order to achieve a fair use of the system, it is recommended to consider the suggested changes in the fair use [guidelines](DGX_fair_use_guidelines.md).
