@@ -61,7 +61,8 @@ def print0(*args, **kwargs):
 
 def main():
     ddp_init()
-    print0('======= To get a printout when using distributed training you need to make sure that it is performed on rank 0.')
+    print0(
+        '======= To get a printout when using distributed training you need to make sure that it is performed on rank 0.')
     print0(f'====== DDP example is on rank {get_rank()}')
 
     training_data = datasets.FashionMNIST(
