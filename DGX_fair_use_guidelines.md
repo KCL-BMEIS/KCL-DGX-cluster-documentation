@@ -2,7 +2,7 @@
 
 The most important aspect of fair and effective use of the GPU cluster is to balance and maximize GPU compute
 utilization. This is vital, not just for fair usage amongst your colleagues, but also for improving the speed of your
-own work.
+own work. In addition, it would handle the reduction in efficiency inherited from the scheduler and from the fragmentation of hardware resources, as we have many users running small training sessions on the cluster.
 
 GPU compute utilization refers to the percentage of a GPU's processing power actively used at a given time. This **DOES
 NOT** refer specifically to the GPU memory (VRAM)  utilization. The important message is that the higher the GPU compute
@@ -65,7 +65,7 @@ This includes:
 - Setting `num_workers` > 0 to use multiple cpu cores for loading data. This is to minimize the time spent by the GPU
   waiting idly for the CPU to transfer data to it for processing.
 - Raising value of `prefetch_factor`.
-- Setting `pin_memory=True`
+- Setting `pin_memory=True`.
 - Setting `persistent_workers=True`
 
 A good default dataloader may look like this:
@@ -78,6 +78,7 @@ prefetch_factor = 4,
 pin_memory = True,
 persistent_workers = True)
 ```
+
 
 ### 2. No brainer code tweaks
 
@@ -95,9 +96,24 @@ These include:
 - Setting `torch.backends.cuda.matmul.allow_tf32 = True` and `torch.backends.cudnn.allow_tf32 = True`. This allows
   pytorch to use the tensor processing cores on newer GPU architectures for matrix multiplication and convolutions.
 - Disabling gradient calculation for validation or inference using `torch.no_grad()`. Typically, gradients aren’t needed
-  for validation or inference.
+  for validation or inference. As a rule of thumb, if you do not need to backpropagate your loss you can usually disable it. When using this function, you can decide on how to use it depending on your needs. If you do not need the gradient tracking for the entire function think about wrapping the function in the decorator:
+  ```python
+  @torch.no_grad()
+  def evaluate(model, dataloader):
+    # Your code here
+  ```
+  On the other hand, if you just need to stop the gradient calculation in a specific section of the code use it under the `with` operator:
+  ```python
+  def my_function(model, dataloader):
+    # Your code with gradient
+
+    with torch.no_grad():
+      # Code with no gradient tracking
+    
+    # Gradient calculation is back on
+  ```
 - Consider replacing a manual implementation of the attention mechanism
-  with `torch.nn.functional.scaled_dot_product_attention`. It calculates eactly the same thing but uses tricks under the
+  with `torch.nn.functional.scaled_dot_product_attention`. It calculates exactly the same thing but uses tricks under the
   hood to perform a much more efficient calculation, while better utilizing your hardware.
 
 ### 3. code tweaks to think about
@@ -108,8 +124,9 @@ These include:
 
 - Using `torch.nn.parallel.DistributedDataParallel` instead of `torch.nn.DataParallel`. This is recommended best
   practise by Pytorch themselves and offers much better performance/scaling. A simple example of how to
-  use `torch.nn.parallel.DistributedDataParallel` is shown in `ddp_example.py`. Further documentation can be
-  found [here](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel).
+  use `torch.nn.parallel.DistributedDataParallel` is shown in [`ddp_example.py`](example_code/ddp_example.py). Further documentation can be
+  found [here](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel). You can also initialize this type of trainings with Elastic Launch using the *torchrun*. You can find the documentation and how to use `torchrun` in [here](https://pytorch.org/docs/stable/elastic/run.html). In addition, there is an official beginner tutorial on Distributed Training [here](https://pytorch.org/tutorials/beginner/ddp_series_fault_tolerance.html).
+
 - Performing data augmentations on the gpu, instead of the cpu. By default pytorch will perform the selected data
   augmentations on the cpu instead of the gpu, and this is a particular performance drain for computationally expensive
   augmentations e.g. warping 3d data. The data can be moved to the gpu and a custom augmentation function can be coded
@@ -130,7 +147,7 @@ These include:
   in `amp_example.py`. Further documention can be found [here](https://pytorch.org/docs/stable/amp.html#torch.autocast).
 - Trying to compile your pytorch model when you are finished debugging. This is often prone to failure and should be
   wrapped in a try statement, however it can greatly improve speed. It can
-  be initiated using `my_model = torch.compile(my_model)`
+  be initiated using `my_model = torch.compile(my_model)`. This only works on `torch >= 2.0.0`.
 
 ---
 
