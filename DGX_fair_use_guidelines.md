@@ -2,7 +2,7 @@
 
 The most important aspect of fair and effective use of the GPU cluster is to balance and maximize GPU compute
 utilization. This is vital, not just for fair usage amongst your colleagues, but also for improving the speed of your
-own work. In addition, it would handle the reduction in efficiency inherited from the scheduler and from the fragmentation of hardware resources.
+own work. In addition, it would handle the reduction in efficiency inherited from the scheduler and from the fragmentation of hardware resources, as we have many users running small training sessions on the cluster.
 
 GPU compute utilization refers to the percentage of a GPU's processing power actively used at a given time. This **DOES
 NOT** refer specifically to the GPU memory (VRAM)  utilization. The important message is that the higher the GPU compute
@@ -124,8 +124,9 @@ These include:
 
 - Using `torch.nn.parallel.DistributedDataParallel` instead of `torch.nn.DataParallel`. This is recommended best
   practise by Pytorch themselves and offers much better performance/scaling. A simple example of how to
-  use `torch.nn.parallel.DistributedDataParallel` is shown in `ddp_example.py`. Further documentation can be
-  found [here](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel). You can also initialize this type of trainings with Elastic Launch using the *torchrun*. 
+  use `torch.nn.parallel.DistributedDataParallel` is shown in [`ddp_example.py`](example_code/ddp_example.py). Further documentation can be
+  found [here](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel). You can also initialize this type of trainings with Elastic Launch using the *torchrun*. You can find the documentation and how to use `torchrun` in [here](https://pytorch.org/docs/stable/elastic/run.html). In addition, there is an official beginner tutorial on Distributed Training [here](https://pytorch.org/tutorials/beginner/ddp_series_fault_tolerance.html).
+
 - Performing data augmentations on the gpu, instead of the cpu. By default pytorch will perform the selected data
   augmentations on the cpu instead of the gpu, and this is a particular performance drain for computationally expensive
   augmentations e.g. warping 3d data. The data can be moved to the gpu and a custom augmentation function can be coded
