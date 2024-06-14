@@ -26,63 +26,11 @@ need an account on the cluster. This can be requested by their supervisors sendi
 
 ---
 
-## How to access the headnodes
+## Tutorials
 
-You will need to login to aicheadnode.isd.kcl.ac.uk to submit jobs.
+1. [Setup Cluster Connection](1-Setup-cluster-connection/README.md)
 
-The headnodes are accessible directly from any of the (wired) School networks in St Thomas or Becket House. If using
-Wi-Fi or if working from home, you will need to use the school ssh gateway (bouncer.isd.kcl.ac.uk) as a jump host to
-access the headnodes.
-
-**IMPORTANT:** Because of the multi-headnode setup, you will need to add the following lines to your `.ssh/config` file
-in your client machine when accessing the headnode at the address aicheadnode:
-
-```
-Host aicheadnode*
-  StrictHostKeyChecking no
-  UserKnownHostsFile=/dev/null
-```
-
-This will prevent the ssh client from complaining because the name aicheadnode is load-balancing via DNS and is in fact
-accessing randomly one of the 3 headnode servers.
-
-If you do not have one already, you can request an account on bouncer sending an email to isd-it@kcl.ac.uk or to
-isd-helpdesk@kcl.ac.uk. Please copy your supervisor in CC when doing so.
-
-The new version of the cluster, expanded to 8 nodes in December 2022, has 3 headnodes instead of one, to redistribute
-the users evenly and reducing the workload on each headnode server.
-
-* You will need to use the name aicheadnode.isd.kcl.ac.uk to connect (which resolves to all 3 addresses, so you will
-  randomly access one of the headnode servers).
-* Your home folder is centralised and stored on the NetApp storage system, so it does not really matter which of the 3
-  headnode servers you login to.
-
-**IMPORTANT:** the only exception is when you are connecting to the cluster for the first time or if you need to change
-the password for your account on the cluster. We have restricted the change password functionality to only one of the
-nodes: h1.isd.kcl.ac.uk (a.k.a. headnode1.isd.kcl.ac.uk), to make the synchronisation of the password file across the
-three nodes easier to manage. So, if you need to change your account's password, you will need to login to
-h1.isd.kcl.ac.uk and use the passwd command. If you try to change your password while logged in on h2 or h3, you will
-receive a message telling you to do it on h1 (headnode1).
-
-**Examples:**
-
-**Accessing from a computer connected to one of the BMEIS (wired) networks:**
-
-```
-ssh <your cluster username>@aicheadnode
-or run
-ssh <your cluster username>@aicheadnode.isd.kcl.ac.uk
-```
-
-**Accessing from a computer at home or outside the BMEIS network:**
-
-```
-ssh -J <your bouncer username>@bouncer.isd.kcl.ac.uk <your_cluster_username>@aicheadnode
-```
-
-**Note:** If you already had an account on the cluster before the cluster expansion/redeployment, your credentials
-should have been kept and you should be able to login as before, regardless if you were using a password or were
-accessing via
+    This tutorial covers the basic about the ssh connection with the cluster. Internal and external device connections are considered, using a bouncer. It helps to stablish a passwordless authentication using ssh-keys.
 
 
 ## Setting Up the Environment for RunAI
