@@ -69,14 +69,15 @@ hostname `aicregistry` with port 5000 to access the registry from the headnode w
 Begin by pulling the desired container. Here are some examples of pulling PyTorch and TensorFlow containers:
 
 ```
+# PyTorch version 2
+docker pull nvcr.io/nvidia/pytorch:24.05-py3
+
 # TensorFlow version 1
 docker pull nvcr.io/nvidia/tensorflow:22.11-tf2-py3
 
 # TensorFlow version 2
-docker pull nvcr.io/nvidia/tensorflow:22.11-tf2-py3
+docker pull nvcr.io/nvidia/tensorflow:24.05-tf2-py3
 
-# PyTorch version 1
-docker pull nvcr.io/nvidia/pytorch:22.11-py3
 ```
 
 For further documentation and a comprehensive list of other available Nvidia containers, refer
