@@ -12,7 +12,7 @@ In this tutorial we will submit our first job 🐤!
 > Also refer to the official [runai Documentation](https://docs.run.ai/latest/)
 
 ## Getting Started
-We will now run our first Docker container through `runai`. We will use the official [hello-world](https://hub.docker.com/_/hello-world) Docker image. This container, will simply print `Hello from Docker!`.
+We will now run our first `Docker` container through `runai`. We will use the official [hello-world](https://hub.docker.com/_/hello-world) `Docker` image. This container, will simply print `Hello from Docker!`.
 
 > [!NOTE]
 > Make sure you can connect to the cluster: [1-Setup-cluster-connection](../1-Setup-cluster-connection).
@@ -25,7 +25,7 @@ runai submit my-first-job -i hello-world -g 0
 
 Couple of thing to notice
 
-- `-i hello-world` specifies the container we wish to run
+- `-i hello-world` specifies the image we wish to run
 - `-g 0` uses **zero** GPUs, hold on cowboy 🤠!
 
 > [!TIP]
