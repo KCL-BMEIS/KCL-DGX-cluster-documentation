@@ -34,12 +34,15 @@ access for any reason).
    This tutorial covers the basic about the ssh connection with the cluster. Internal and external device connections
    are considered, using a bouncer. It helps to stablish a passwordless authentication using ssh-keys.
 
-2. [Setup Docker container](2-Setup-Docker-container/README.md)
+2. [Hello World!](2-Hello-world/README.md)
 
-   This tutorial covers the basics about setting up a Docker container to be able to run on the cluster, together with
-   Runai.
+   This tutorial lets you run your first job on the cluster through runai!
 
-3. [General code optimization](3-General-code-optimization/README.md)
+3. [Setup Docker container](3-Setup-Docker-container/README.md)
+
+   This tutorial explains the creation of custom Docker containers.
+
+4. [General code optimization](4-General-code-optimization/README.md)
 
    This is for tutorials which show how to best utilize the cluster.
 
