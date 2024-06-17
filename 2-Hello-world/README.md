@@ -17,17 +17,23 @@ We will now run our first Docker container through `runai`. We will use the offi
 > [!NOTE]
 > Make sure you can connect to the cluster: [1-Setup-cluster-connection](../1-Setup-cluster-connection).
 
+
+`ssh` into the cluster and run:
+```shell
+runai submit my-first-job -i hello-world -g 0
+```
+
+Couple of thing to notice
+
+- `-i hello-world` specifies the container we wish to run
+- `-g 0` uses **zero** GPUs, hold on cowboy 🤠!
+
 > [!TIP]
 > Use `--help` to access documentation:
 >
 > ```shell
 > runai submit --help
 > ```
-
-`ssh` into the cluster and run:
-```shell
-runai submit my-first-job -i hello-world -g 0
-```
 
 You can now observe the status of your job using
 ```shell
