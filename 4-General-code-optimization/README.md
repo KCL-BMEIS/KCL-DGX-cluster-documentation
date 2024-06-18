@@ -1,9 +1,16 @@
 # How to Optimize GPU utilization
 
 This tutorial covers the basic concepts for achieving maximum GPU compute utilization during deep learning training.
-This can be achieved in a number of ways, and can be broadly broken down into the following sections:
+This can be achieved in a number of ways, and can be broadly broken down into a few broad categories.
+
+---
 
 ## 1. Make the most of the pytorch dataloader:
+
+> [!NOTE]
+> In rare cases some of these options may produce slightly worse speed. It is best to do a few timed epochs as a sanity
+> check to see training rate before and after these changes.
+
 
 The built-in Pytorch
 dataloader, [torch.utils.data.DataLoader](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader), has a
@@ -14,10 +21,11 @@ This includes:
 - Setting `batch_size` to as high as possible before reaching an OOM error (VRAM too full to fit all data). This
   maximizes the time the GPU spends on performing computations, before having to wait for more data to be loaded.
 - Setting `num_workers` > 0 to use multiple cpu cores for loading data. This is to minimize the time spent by the GPU
-  waiting idly for the CPU to transfer data to it for processing.
+  waiting idly for the CPU to transfer data to it for processing. You must use the `--cpu-limit` option when launching
+  in runai so as to not overload the system.
 - Raising value of `prefetch_factor`.
 - Setting `pin_memory=True`.
-- Setting `persistent_workers=True`
+- Setting `persistent_workers=True`.
 
 A good default dataloader may look like this:
 
@@ -26,17 +34,19 @@ from torch.utils.data import DataLoader
 
 my_dataloader = DataLoader(my_dataset,
                            batch_size=my_max_batchsize,
-                           num_workers=my_max_cpu_count,  # Note: you must use with --cpu-limit option in the runai command
+                           num_workers=my_max_cpu_count,  # Must use with --cpu-limit option in the runai command
                            prefetch_factor=4,
                            pin_memory=True,
                            persistent_workers=True)
 ```
 
+---
+
 ## 2. No brainer code tweaks
 
 There are a number of easy changes you can use to greatly improve training speed of your models, while changing
-absolutely nothing about how your network trains/ how you debug. The recommendation would be to always use these
-suggested options, no matter what you do.
+absolutely nothing about how your network trains/ how you debug. The recommendation would be to always aim to use these
+suggested options.
 
 These include:
 
@@ -51,32 +61,37 @@ These include:
   for validation or inference. As a rule of thumb, if you do not need to backpropagate your loss you can usually disable
   it. When using this function, you can decide on how to use it depending on your needs. If you do not need the gradient
   tracking for the entire function think about wrapping the function in the decorator:
-- 
-  ```python
-  @torch.no_grad()
-  def evaluate(model, dataloader):
-    # Your code here
-  ```
-  
-  On the other hand, if you just need to stop the gradient calculation in a specific section of the code use it under
-  the `with` operator:
-- 
-  ```python
-  def my_function(model, dataloader):
+-
+
+```python
+@torch.no_grad()
+def evaluate(model, dataloader):
+# Your code here
+```
+
+On the other hand, if you just need to stop the gradient calculation in a specific section of the code use it under
+the `with` operator:
+
+-
+
+```python
+def my_function(model, dataloader):
     # Your code with gradient
 
     with torch.no_grad():
-      # Code with no gradient tracking
-    
-    # Gradient calculation is back on
-  ```
-  
+# Code with no gradient tracking
+
+# Gradient calculation is back on
+```
+
 - Consider replacing a manual implementation of the attention mechanism
   with `torch.nn.functional.scaled_dot_product_attention`. It calculates exactly the same thing but uses tricks under
   the
   hood to perform a much more efficient calculation, while better utilizing your hardware.
 
-## 3. code tweaks to think about
+---
+
+## 3. Code tweaks to think about
 
 There are also a number of code tweaks which you can implement cautiously.
 

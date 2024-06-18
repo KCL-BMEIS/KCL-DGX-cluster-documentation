@@ -2,6 +2,10 @@
 
 ## Introduction
 
+> [!WARNING]
+> This cluster is **`ONLY`** for KCL BMEIS members. Non-members will not be granted
+access, for any reason.
+
 The School of BMEIS AI cluster is a system made of the following components:
 
 * 3 x Dell PowerEdge headnodes running Ubuntu (currently 20.04)
@@ -18,8 +22,7 @@ containerised applications.
 
 Users wanting to use the cluster and submit jobs need to access one of the headnodes via ssh. To do this, new starters
 need an account on the cluster. This can be requested by their supervisors sending an email to `isd-it@kcl.ac.uk` or to
-`isd-helpdesk@kcl.ac.uk` (Please note this cluster is **`ONLY`** for KCL BMEIS members. Non members will not be granted
-access for any reason).
+`isd-helpdesk@kcl.ac.uk`.
 
 ---
 
@@ -83,8 +86,7 @@ docker pull nvcr.io/nvidia/tensorflow:24.05-tf2-py3
 
 ```
 
-For further documentation and a comprehensive list of other available Nvidia containers, refer
-to [here](link to Nvidia container documentation).
+For further documentation and a comprehensive list of other available containers visit [Dockerhub](https://hub.docker.com/).
 
 You can now run a job using a Docker image built with this container by using the RunAI submission system. The main
 arguments are outlined below, along with an example:
@@ -191,68 +193,6 @@ Steps 1, 3, and 5 can be consolidated by creating a bash script containing both 
 and `tensorboard --logdir <LOGDIR> --port <DGXPORT>`. This way, you only need to check the job logs to obtain the host
 IP.
 
-## Running Jobs with Custom Containers
-
-This section guides you through creating and utilizing your custom Docker image for running jobs.
-
-**Steps:**
-
-1. **Create a folder:** Within your home directory, create a folder to store your Dockerfile and related files for
-   container creation.
-
-2. **Create a Dockerfile:** Use your preferred editor to create a Dockerfile specifying the desired software available
-   in your container. Here's a recommended approach:
-
-    * Start by pulling an existing container (e.g., Nvidia TensorFlow container).
-    * Install any supplementary programs required.
-
-   **Basic Template:**
-
-   ```dockerfile
-   FROM nvcr.io/nvidia/tensorflow:22.11-tf2-py3
-
-   ARG USER_ID
-   ARG GROUP_ID
-   ARG USER
-
-   RUN addgroup --gid $GROUP_ID $USER
-   RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
-   WORKDIR /nfs/home/$USER
-   EXPOSE 8888
-   ```
-
-3. **Place additional files (optional):** If you have additional files the Dockerfile needs to read, place them in the
-   same folder. Before using them in a command, explicitly copy them into the current directory.
-
-   ```
-   # Example: requirements.txt containing packages to install using pip
-   COPY requirements.txt.
-   RUN pip3 install -r requirements.txt
-   ```
-
-4. **Build and push the image:** Create a bash script containing the following commands to build and push your image to
-   the registry (assuming the script is in the same directory as your Dockerfile named Dockerfile):
-
-   ```bash
-   #!/bin/bash
-
-   # Create a tag or name for the image
-   docker_tag="your_image_name:tag"
-
-   # Build the image using your Dockerfile and arguments
-   docker build . -f Dockerfile \
-     --tag ${docker_tag} --network=host \
-     --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg USER=${USER}
-
-   docker push ${docker_tag}
-   ```
-
-   Run this script to build and push the image.
-
-5. **Verify image creation:** Use `docker images` to confirm successful image creation.
-
-6. **Run a job with your custom image:** You can now use your custom image just like a standard container by specifying
-   its name in the `--image` argument of the `runai` command.
 
 ## How to Check Job Failures
 
