@@ -22,12 +22,14 @@ This includes:
 A good default dataloader may look like this:
 
 ```python
-my_dataloader = torch.utils.data.DataLoader(my_dataset,
-                                            batch_size=my_max_batchsize,
-                                            num_workers=my_max_cpu_count,
-                                            prefetch_factor=4,
-                                            pin_memory=True,
-                                            persistent_workers=True)
+from torch.utils.data import DataLoader
+
+my_dataloader = DataLoader(my_dataset,
+                           batch_size=my_max_batchsize,
+                           num_workers=my_max_cpu_count,  # Note: you must use with --cpu-limit option in the runai command
+                           prefetch_factor=4,
+                           pin_memory=True,
+                           persistent_workers=True)
 ```
 
 ## 2. No brainer code tweaks
