@@ -1,0 +1,14 @@
+Host aicheadnode*
+ Port 22
+ User your-cluster-name
+ StrictHostKeyChecking no
+ UserKnownHostsFile=/dev/null
+ LogLevel ERROR
+ # If your computer is outside the school network you need to add this line
+ ProxyJump bouncer
+
+# Bouncer account
+Host bouncer
+ Hostname bouncer.isd.kcl.ac.uk
+ User your-bouncer-user
+ Port 22
