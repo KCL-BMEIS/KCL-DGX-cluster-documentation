@@ -1,6 +1,6 @@
-# Hello World!
+# RunAI setup & Hello World!
 
-In this tutorial we will submit our first job🐤!
+In this tutorial we will setup our runai account and submit our first job🐤!
 
 ## Overview
 
