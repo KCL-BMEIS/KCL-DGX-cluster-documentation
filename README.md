@@ -37,9 +37,9 @@ need an account on the cluster. This can be requested by their supervisors sendi
    This tutorial covers the basic about the ssh connection with the cluster. Internal and external device connections
    are considered, using a bouncer. It helps to stablish a passwordless authentication using ssh-keys.
 
-2. [Hello World!](2-Hello-world/README.md)
+2. [Hello World!](2-Runai-setup-Hello-world/README.md)
 
-   This tutorial lets you run your first job on the cluster through runai!
+   This tutorial lets you run your first job on the cluster through runai after completing the configuration of your runai project!
 
 3. [Setup Docker container](3-Setup-Docker-container/README.md)
 
@@ -49,15 +49,6 @@ need an account on the cluster. This can be requested by their supervisors sendi
 
    This is for tutorials which show how to best utilize the cluster.
 
-## Setting Up the Environment for RunAI
-
-After logging in to the cluster headnode for the first time, you'll need to configure the environment for the RunAI
-scheduler. Here are the commands:
-
-```
-runai login -> When prompted, authenticate with your RunAI portal account details.
-runai config project DGX_username -> Replace `DGX_username` with your username on the cluster nodes.
-```
 
 ## Access to Worker Nodes (DGXs)
 
