@@ -1,4 +1,5 @@
-Host aicheadnode*
+Host aicheadnode
+ Hostname aicheadnode.isd.kcl.ac.uk
  Port 22
  User your-cluster-name # e.g. for John Doe the username is jdoe
  StrictHostKeyChecking no

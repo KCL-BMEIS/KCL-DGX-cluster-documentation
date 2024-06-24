@@ -22,6 +22,7 @@ your school system outside the school, you must ask IT for a bouncer account.
 
 ## Connecting for the first time
 
+
 The first time you connect to the cluster, you should connect to a specific node. This first connection requires you to
 change the temporary password, and it is very important to follow the steps precisely, as failing to do so will require
 waiting longer for an account reset.
@@ -40,6 +41,10 @@ ssh -J <bouncer-user>@bouncer.isd.kcl.ac.uk <cluster-user>@h1.isd.kcl.ac.uk
 
 Once you enter the temporary password for the first time, the program will ask you to write a new permanent password.
 Remember this password as it is the one we will use for now for the next steps.
+
+> [!NOTE]
+> You should only connect to *headnode1* on your first connection, from this point onwards you must always connect to one of the nodes randomly using:
+> `ssh <cluster-user>@aicheadnode.isd.kcl.ac.uk`.
 
 ## Configuring future and passworldless connections
 
