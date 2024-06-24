@@ -106,7 +106,7 @@ def main():
     #  Compiling models is a bit spotty in terms of reliability, so it's recommended to wrap the compile procedure.
     try:
         model = torch.compile(model, mode='max-autotune') #  max-autotone can be very slow, if desired try 'default'
-        print0('Successful model compilation, carrying o with training.')
+        print0('Successful model compilation, carrying on with training.')
     except Exception as e:
         if get_rank() == 0:
             warnings.warn('Tried and failed to compile pytorch model, continuing in standard mode.')
@@ -142,32 +142,35 @@ def main():
                 scaler.step(optimizer)
                 scaler.update()
 
-            if best_loss > loss.item():  # Best practise says this should be the validation loss, but it's a tutorial.
-                best_loss = loss.item()
-                torch.save(ddp_model.module.state_dict(), model_save_path)
+            if get_rank() == 0:  # Only want a single gpu saving the model
+                if best_loss > loss.item():  # Best practise says this should be the validation loss, but it's a tutorial.
+                    best_loss = loss.item()
+                    torch.save(ddp_model.module.state_dict(), model_save_path)
 
         print0(f'Epoch {epoch} loss: {epoch_loss / len(my_dataloader)}')
 
     print0(f'Finished training and now showing how loading the model works')
 
     del model, ddp_model  # Making sure we aren't just using weights already in memory
+    torch.distributed.barrier()  # Makes all the gpus wait until they reach here
+    if get_rank() == 0:  # Only want a single gpu saving and loading the model
+        print0('Initializing fresh model')
+        model = ExampleModel().to(get_rank())
+        ddp_model = DDP(model, device_ids=[get_rank()])
 
-    print0('Initializing fresh model')
-    model = ExampleModel().to(get_rank())
-    ddp_model = DDP(model, device_ids=[get_rank()])
+        print0('Now loading model')
 
-    print0('Now loading model')
+        #  When training, the DDP models have an added attribute 'module' which would need to be removed using the below
+        #  line of code if you want to run a loaded model.
+        #  When loading, you want the map_location to be 'cpu' so that it can be sent out to all the gpus afterwards.
+        state_dict = torch.load(model_save_path, map_location='cpu')
+        ddp_model = ddp_model.module if hasattr(ddp_model, "module") else ddp_model
+        remove_prefix = '_orig_mod.'
+        state_dict = {k[len(remove_prefix):] if k.startswith(remove_prefix) else k: v for k, v in state_dict.items()}
 
-    #  When training, the DDP models have an added attributes which would need to be removed using the below
-    #  line of code if you want to run a loaded model.
-    state_dict = torch.load(model_save_path, map_location='cpu')
-    ddp_model = ddp_model.module if hasattr(ddp_model, "module") else ddp_model
-    remove_prefix = '_orig_mod.'
-    state_dict = {k[len(remove_prefix):] if k.startswith(remove_prefix) else k: v for k, v in state_dict.items()}
-    ddp_model.load_state_dict(state_dict)
+        ddp_model.load_state_dict(state_dict)
 
-    #  When loading, you want the map_location to be 'cpu' so that it can then be sent out to all the gpus afterwards.
-    os.remove(model_save_path)  # Removing the temporary save folder
+        os.remove(model_save_path)  # Removing the temporary save folder
 
     print0('====== DDP example has successfully been completed')
     torch.distributed.destroy_process_group()  # To properly end the DDP process
