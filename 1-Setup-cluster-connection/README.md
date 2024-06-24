@@ -44,7 +44,7 @@ Remember this password as it is the one we will use for now for the next steps.
 
 > [!NOTE]
 > You should only connect to *headnode1* on your first connection, from this point onwards you must always connect to one of the nodes randomly using:
-> `ssh <cluster-user>@aicheadnode.kcl.ac.uk`.
+> `ssh <cluster-user>@aicheadnode.isd.kcl.ac.uk`.
 
 ## Configuring future and passworldless connections
 
