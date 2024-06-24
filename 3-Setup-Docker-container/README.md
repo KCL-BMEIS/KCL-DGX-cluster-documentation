@@ -36,10 +36,11 @@ This tutorial covers the basic concepts of how to create your own Docker contain
    RUN pip3 install -r requirements.txt
    ```
 
-   > [!TIP]
-   > If you are using multiple consecutive `RUN` statements in your dockerfile, you can chain them together using `&&` This
-   > reduces both the memory size and build time of the subsequent dockerfile e.g. for the previous together file:
-   
+> [!TIP]
+> If you are using multiple consecutive `RUN` statements in your dockerfile, you can chain them together using `&&` This
+> reduces both the memory size and build time of the subsequent dockerfile.
+
+   E.g., for the previous together file:
    ```dockerfile
       RUN addgroup --gid $GROUP_ID $USER && adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
    ```

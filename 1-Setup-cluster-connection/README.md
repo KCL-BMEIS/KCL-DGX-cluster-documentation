@@ -16,14 +16,14 @@ your school system outside the school, you must ask IT for a bouncer account.
  access for any reason). Don't forget to
 > CC your supervisor in the email. Your bouncer account should have the following
 > structure `<bouncer-user>@bouncer.isd.kcl.ac.uk`, where `<bouncer-user>` is usually formed by the first character of
-> your name and surname and the year the account was created. For example, if **John Doe** ask for an account in **2024
+> your name and surname and the year the account was created. For example, if **John Doe** asks for an account in **2024
 **,
 > his username will be **jd24**.
 
 ## Connecting for the first time
 
-The first time you connect to the cluster, you should connect to an specific node. This first connection requires you to
-change the temporary password and it is very important to follow the steps precisely, as failing to do so will require
+The first time you connect to the cluster, you should connect to a specific node. This first connection requires you to
+change the temporary password, and it is very important to follow the steps precisely, as failing to do so will require
 waiting longer for an account reset.
 
 1. Connect to the *headnode1* in the cluster. To do so, open a terminal and run the following command:
@@ -32,7 +32,7 @@ waiting longer for an account reset.
 ssh <cluster-user>@h1.isd.kcl.ac.uk
 ```
 
-Note: If you are outside the School you will need the bouncer to connect to the cluster through a Proxy.
+Note: If you are outside the School, you will need the bouncer to connect to the cluster through a Proxy.
 
 ```shell
 ssh -J <bouncer-user>@bouncer.isd.kcl.ac.uk <cluster-user>@h1.isd.kcl.ac.uk
@@ -47,7 +47,7 @@ Remember this password as it is the one we will use for now for the next steps.
 
 All the files related to *openssh* are located in the folder `${HOME}/.ssh` for both Linux and Windows OS. The most
 important file inside this folder is the `config` file. This file contains the information of different hosts and the
-options we want to use when connecting to them. If the file does not exist we can create this file using a text editor
+options we want to use when connecting to them. If the file does not exist, we can create this file using a text editor
 such as `nano`, `vim`, `touch` or your common IDE. A common *config* file with the necessary options to establish the
 connection with the *aicheadnode* can be found in [here](config). If you are using this sample file, remember to
 substitute the missing parts with your username for both the bouncer and the aicheadnode.
@@ -80,7 +80,7 @@ our system without needing a password. Depending on your OS, the commands you wi
 ssh-copy-id -i ~/.ssh/id_rsa.pub aicheadnode
 ```
 
-> **Windows**: In Windows the command `ssh-copy-id` does not exist, therefore we need to write the command from scratch.
+> **Windows**: In Windows the command `ssh-copy-id` does not exist, therefore, we need to write the command from scratch.
 > This command basically appends the key to the `authorized-keys` file on the remote system. Therefore, the solution for
 > Windows using a Powershell command line is:
 
@@ -100,5 +100,5 @@ Congratulations! You can now access the cluster without any passwords, as we are
 Remember that if **you change your keys, you will need to repeat this process.**
 
 Sometimes if we are outside the School's network, we may be asked for the password of our bouncer account. To solve this
-problem repeat the previous steps to copy the public key onto the bouncers `authorized-keys` file and we will be granted
+problem repeat the previous steps to copy the public key onto the bouncers `authorized-keys` file, and we will be granted
 passwordless access even under the proxy connection.

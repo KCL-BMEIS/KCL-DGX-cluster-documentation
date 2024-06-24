@@ -8,7 +8,7 @@ This can be achieved in a number of ways, and can be broadly broken down into a 
 ## 1. Make the most of the pytorch dataloader:
 
 > [!NOTE]
-> In rare cases some of these options may produce slightly worse speed. It is best to do a few timed epochs as a sanity
+> In rare cases, some of these options may produce slightly worse speed. It is best to do a few timed epochs as a sanity
 > check to see training rate before and after these changes.
 
 
@@ -19,10 +19,10 @@ number of arguments you can define in order to improve the throughput of data be
 This includes:
 
 - Setting `batch_size` to as high as possible before reaching an OOM error (VRAM too full to fit all data). This
-  maximizes the time the GPU spends on performing computations, before having to wait for more data to be loaded.
+  maximizes the time the GPU spends on performing computations before having to wait for more data to be loaded.
 - Setting `num_workers` > 0 to use multiple cpu cores for loading data. This is to minimize the time spent by the GPU
   waiting idly for the CPU to transfer data to it for processing. You must use the `--cpu-limit` option when launching
-  in runai so as to not overload the system.
+  in runai to not overload the system.
 - Raising value of `prefetch_factor`.
 - Setting `pin_memory=True`.
 - Setting `persistent_workers=True`.
@@ -52,15 +52,15 @@ These include:
 
 - Using `model.zero_grad(set_to_none=True)` instead of `model.zero_grad()`
 - Disable bias for convolutions directly followed by a batch norm i.e. `torch.nn.Conv2d(..., bias=False, ....)`
-- Using `torch.backends.cudnn.benchmark = True` to automatically find fastest convolution algorithm.
+- Using `torch.backends.cudnn.benchmark = True` to automatically find the fastest convolution algorithm.
 - Create tensors directly on the target device e.g. Instead of calling `torch.rand(size).cuda()` instead
   use `torch.rand(size, device='cuda')`
 - Setting `torch.backends.cuda.matmul.allow_tf32 = True` and `torch.backends.cudnn.allow_tf32 = True`. This allows
   pytorch to use the tensor processing cores on newer GPU architectures for matrix multiplication and convolutions.
 - Disabling gradient calculation for validation or inference using `torch.no_grad()`. Typically, gradients aren’t needed
-  for validation or inference. As a rule of thumb, if you do not need to backpropagate your loss you can usually disable
+  for validation or inference. As a rule of thumb, if you do not need to backpropagate your loss, you can usually disable
   it. When using this function, you can decide on how to use it depending on your needs. If you do not need the gradient
-  tracking for the entire function think about wrapping the function in the decorator:
+  tracking for the entire function, think about wrapping the function in the decorator:
 -
 
 ```python
@@ -98,41 +98,41 @@ There are also a number of code tweaks which you can implement cautiously.
 These include:
 
 - Using `torch.nn.parallel.DistributedDataParallel` instead of `torch.nn.DataParallel`. This is recommended best
-  practise by Pytorch themselves and offers much better performance/scaling. A simple example of how to
+   practice by Pytorch themselves and offers much better performance/scaling. A simple example of how to
   use `torch.nn.parallel.DistributedDataParallel` is shown in [`ddp_example.py`](example_code/ddp_example.py). Further
   documentation can be
   found [here](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel).
-  You can also initialize this type of trainings with Elastic Launch using the *torchrun*. You can find the
+  You can also initialize this type of training with Elastic Launch using the *torchrun*. You can find the
   documentation and how to use `torchrun` in [here](https://pytorch.org/docs/stable/elastic/run.html). In addition,
   there is an official beginner tutorial on Distributed
   Training [here](https://pytorch.org/tutorials/beginner/ddp_series_fault_tolerance.html).
 
-- Performing data augmentations on the gpu, instead of the cpu. By default pytorch will perform the selected data
+- Performing data augmentations on the gpu, instead of the cpu. By default, pytorch will perform the selected data
   augmentations on the cpu instead of the gpu, and this is a particular performance drain for computationally expensive
-  augmentations e.g. warping 3d data. The data can be moved to the gpu and a custom augmentation function can be coded
-  using pytorch to then automatically perform the computation on the gpu. A simple example of how to perform GPU based
+  augmentations e.g. warping 3d data. The data can be moved to the GPU, and a custom augmentation function can be coded
+  using pytorch to then automatically perform the computation on the gpu. A simple example of how to perform GPU-based
   data augmentations can be found in `gpu_data_augmentations.py`.
 - Enabling channels_last memory format for vision models if there are no hard coded operations on exact tensor
   dimensions in your code e.g. `my_data = my_data.to(memory_format=torch.channels_last)`. Take care to also make sure
   that your model is also in the same channels format e.g. `my_model = my_model.to(memory_format=torch.channels_last)`.
   Further details can be found [here](https://pytorch.org/tutorials/intermediate/memory_format_tutorial.html).
-- Disabling debugging APIs. When you are finished coding/debuggin a model you don't need all the background activity of
+- Disabling debugging APIs. When you are finished coding/debuggin a model, you don't need all the background activity of
   Pytorch checking everything is ok for debugging purposes. These options can be disabled
   using `torch.autograd.set_detect_anomaly(False)`, `torch.autograd.profiler.profile(enabled=False)`
   and `torch.autograd.profiler.emit_nvtx(enabled=False)`.
 - Using torch automatic mixed precision. Most models can train/inference perfectly well in a reduced level of numerical
-  precision, in theory doubling your compute speed while halving your memory consumption. Care should be taken to make
+  precision, in theory, doubling your compute speed while halving your memory consumption. Care should be taken to make
   sure your model is stable before relying fully on automatic mixed precision. It can be used as a context manager
   e.g. `with torch.autocast(device_type="cuda"):`. A simple example of how to automatic mixed precision is shown
   in `amp_example.py`. Further documention can be found [here](https://pytorch.org/docs/stable/amp.html#torch.autocast).
 - Trying to compile your pytorch model when you are finished debugging. This is often prone to failure and should be
-  wrapped in a try statement, however it can greatly improve speed. It can
+  wrapped in a try statement; however, it can greatly improve speed. It can
   be initiated using `my_model = torch.compile(my_model)`. This only works on `torch >= 2.0.0`.
 
 ---
 
 # Putting it all together
 
-A barebones example template script using all of the recommendations can be found in `simple_example.py`. Another script
+A barebones example template script using all the recommendations can be found in `simple_example.py`. Another script
 based upon `simple_recommendations_example.py` which has some more complexity added for better quality of life
 is `fancy_recommendations_example.py`
