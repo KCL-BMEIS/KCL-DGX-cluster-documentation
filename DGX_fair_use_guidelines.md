@@ -75,14 +75,16 @@ Occasionally, you may need to run a CPU-only job on the server. Keep an eye on t
 the node you are using and adjust your limits. It may help to break your processing into separate jobs; that way you can 
 submit as many as the node can handle and wait until they complete before submitting more.
 
+> To select a specific node type when submitting a runai job use the `--node-type` argument. At time of writing, valid values are "dgx1", "dgx2" and "A100".
+
 ### Memory leaks
 
-In the Run:ai interface, monitor the CPU memory usage of your job. These appear in the "Metrics" charts shown above, 
-below the GPU metrics. If the memory use is climbing monotonically, you 
-have a memory leak. This job risks crashing by running out of memory, being killed by the system, or even bringing down 
-the node it is running on. The `--memory-limit` flag should at least limit the consequences to the job itself. If you 
-see this happening, inspect your code for steps where memory use can accumulate (e.g. objects growing inside a loop). 
-Try clearing those variables once they are no longer needed. Using the garbage collector in Python might help.
+You can monitor the CPU memory usage of your job in the Run:AI "Metrics" panel. If your memory use keeps increasing, you 
+have a memory leak. This can kill your job or even the whole node. Try the following:
+
+* Use `--memory-limit` when submitting your job.
+* Inspect your code for steps where memory use can accumulate (e.g. objects growing inside a loop) and eliminate those.
+* Using the garbage collector in Python might help (YMMV).
 
 ## Fair use of disk storage
 
@@ -109,7 +111,7 @@ colleagues to pick up where you left off.
 
 The entire cluster runs on a single storage system. If too many processes are trying to read and write from the disk at 
 once then the system will slow down for everyone. Try to optimise your code to avoid repeated reads from the same file. 
-Some modules / data loaders will allow you to explicitly cache data in memory.
+Some modules / data loaders will allow you to explicitly cache data in memory (but may use up CPU memory, so monitor this).
 
 This is where we enter slightly controversial territory. Some sysadmins have observed that VScode and possibly Pycharm 
 spawn hundreds of background processes, some of which are constantly checking the filesystem for changes. It has been 
