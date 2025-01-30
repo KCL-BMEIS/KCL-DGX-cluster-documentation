@@ -40,6 +40,7 @@ RUN pip3 install -r requirements.txt
 > [!TIP]
 > If you are using multiple consecutive `RUN` statements in your dockerfile, you can chain them together using `&&` This
 > reduces both the memory size and build time of the subsequent dockerfile.
+> 
 > E.g., for the previous together file:
 ```dockerfile
       RUN addgroup --gid $GROUP_ID $USER && adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
@@ -50,22 +51,25 @@ the registry (assuming the script is in the same directory as your Dockerfile na
 
 ```bash
 #!/bin/bash
+
 read -p "Enter image name: [default: "${USER}"] " image_name
 if [ -z ${image_name} ]; then
 image_name=${USER}
 fi
+
 # Create a tag or name for the image
 docker_tag="aicregistry:5000/"${image_name}
 export GROUP_ID=$(id -g)
 export USER_ID=$USER
 echo "Docker tag: "${docker_tag}
+
+# Build the image using your Dockerfile and arguments
 echo "Building the image..."
 echo "docker build -f Dockerfile . --tag ${docker_tag} --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg USER=${USER} --progress=plain --no-cache"
-# Build the image using your Dockerfile and arguments
 docker build -f Dockerfile . --tag ${docker_tag} --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg USER=${USER} --progress=plain --no-cache
+
+# Push the built image to aicregistry
 docker push ${docker_tag}
-docker images | head -n 1
-docker images | grep ${docker_tag}
 ```
 
 Run this bash script to build and push the image.
