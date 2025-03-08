@@ -49,6 +49,9 @@ need an account on the cluster. This can be requested by their supervisors sendi
 
    This is for tutorials which show how to best utilize the cluster.
 
+5. [Return to interactive session](5-Return-to-interactive-session/README.md)
+
+   This tutorial explains how interactive session can be run in the background.
 
 ## Access to Worker Nodes (DGXs)
 
