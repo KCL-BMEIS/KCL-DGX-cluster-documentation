@@ -14,7 +14,7 @@ in your container. Here's a recommended approach:
    * Start by pulling an existing container (e.g., Nvidia TensorFlow container).
    * Install any supplementary programs required.
 
-**Basic Template:**
+**Basic template:**
 
 ```dockerfile
 FROM nvcr.io/nvidia/tensorflow:22.11-tf2-py3
