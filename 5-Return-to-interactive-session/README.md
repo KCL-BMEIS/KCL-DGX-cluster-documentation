@@ -22,7 +22,8 @@ This offers a convenient way to test your code / optimize for performance / trac
 Inside the shell, install `tmux`:
 
 ```shell
-sudo apt install tmux
+apt update
+apt install tmux -y
 ```
 
 Instead of running your script directly, do:
