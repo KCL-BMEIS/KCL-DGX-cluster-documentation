@@ -1,4 +1,4 @@
-# Return to Interactive Session
+# Return to interactive session
 This tutorial explains a neat trick for returning to interactive sessions. This is useful for:
 
 - Performance optimization

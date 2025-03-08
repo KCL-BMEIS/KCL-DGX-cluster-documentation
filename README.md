@@ -32,12 +32,12 @@ need an account on the cluster. This can be requested by their supervisors sendi
 
 ## Tutorials
 
-1. [Setup Cluster Connection](1-Setup-cluster-connection/README.md)
+1. [Setup cluster connection](1-Setup-cluster-connection/README.md)
 
    This tutorial covers the basic about the ssh connection with the cluster. Internal and external device connections
    are considered, using a bouncer. It helps to stablish a passwordless authentication using ssh-keys.
 
-2. [Hello World!](2-Runai-setup-Hello-world/README.md)
+2. [Hello world!](2-Runai-setup-hello-world/README.md)
 
    This tutorial lets you run your first job on the cluster through runai after completing the configuration of your runai project!
 
@@ -53,18 +53,18 @@ need an account on the cluster. This can be requested by their supervisors sendi
 
    This tutorial explains how interactive session can be run in the background.
 
-## Access to Worker Nodes (DGXs)
+## Access to worker nodes (DGXs)
 
 Following the upgrade, access to the DGX (worker nodes) has been disabled for users. This is because it's not required
 and can cause problems. To use the cluster and submit jobs, you only need access to one of the headnodes. Refer to the
 instructions in the previous section.
 
-## The Registry
+## The registry
 
 The registry is now distributed across all three headnodes, increasing the cluster's high availability. Use the
 hostname `aicregistry` with port 5000 to access the registry from the headnode where you're logged in.
 
-## Running a Job Using a Standard Nvidia Container
+## Running a job using a standard NVIDIA container
 
 Begin by pulling the desired container. Here are some examples of pulling PyTorch and TensorFlow containers:
 
@@ -85,7 +85,7 @@ For further documentation and a comprehensive list of other available containers
 You can now run a job using a Docker image built with this container by using the RunAI submission system. The main
 arguments are outlined below, along with an example:
 
-**Main Submission Arguments:**
+**Main submission arguments:**
 
 * `runai submit --name <Job Name>`: Specifies the name of your job.
 * `--image -i <Docker Image>`: Defines the Docker image to use.
@@ -110,12 +110,12 @@ runai submit --name tester \
 In this example, `run_tester.sh` is a bash script that might contain additional commands like `python3`. To run the
 script, we call `bash`, hence it's included in the `--command` option.
 
-**General Tips:**
+**General tips:**
 
 * It's recommended to always include `-v /nfs:/nfs` and `--run-as-user` in your commands.
 * Refer to the RunAI submit documentation for further information.
 
-## Job Monitoring/Listing/Deletion
+## Job monitoring/listing/deletion
 
 Once you've submitted a job, you can view its details using:
 
@@ -150,7 +150,7 @@ runai delete job <JobName>
 
 See the official man page on `runai delete` for more information.
 
-## Checking Job Logs Using TensorBoard
+## Checking job logs using TensorBoard
 
 This section explains how to view logs from a running job using TensorBoard.
 
@@ -181,14 +181,14 @@ tensorboard --logdir <LOGDIR> --port <DGXPORT>
 6. **View TensorBoard logs:** Finally, navigate to `http://localhost:<LOCALPORT>` in your web browser to view the
    TensorBoard logs.
 
-**Simplifying Steps:**
+**Simplifying steps:**
 
 Steps 1, 3, and 5 can be consolidated by creating a bash script containing both `hostname -i`
 and `tensorboard --logdir <LOGDIR> --port <DGXPORT>`. This way, you only need to check the job logs to obtain the host
 IP.
 
 
-## How to Check Job Failures
+## How to check job failures
 
 This section explains how to identify the underlying error causing job failures and prevent them from getting stuck in a
 loop.

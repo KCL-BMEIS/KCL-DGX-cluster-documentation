@@ -1,4 +1,4 @@
-# RunAI setup & Hello World!
+# RunAI setup & hello world!
 
 In this tutorial we will setup our runai account and submit our first job🐤!
 
@@ -34,7 +34,7 @@ Also, when you run the `runai login` command it will tell you to introduce your 
 > [!NOTE]
 > Also refer to the official [runai Documentation](https://docs.run.ai/latest/)
 
-## Getting Started
+## Getting started
 
 We will now run our first `Docker` container through `runai`. We will use the
 official [hello-world](https://hub.docker.com/_/hello-world) `Docker` image. This container, will simply
